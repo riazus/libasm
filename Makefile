@@ -2,7 +2,7 @@ NAME		:= libasm
 
 ASM			:= nasm
 ASMFLAGS	:= -f elf64
-LD      	:= ld
+LD      	:= gcc
 
 SRC_DIR		:= src
 OBJ_DIR		:= obj
@@ -14,7 +14,7 @@ all: $(NAME)
 
 # Link step
 $(NAME): $(OBJS)
-	$(LD) -o $@ $^
+	$(LD) -no-pie -o $@ $^
 
 # Assembly step
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.asm | $(OBJ_DIR)
