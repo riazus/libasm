@@ -1,0 +1,11 @@
+# Use x86-64 Ubuntu base image
+FROM --platform=linux/amd64 ubuntu:22.04
+
+# Install build tools
+RUN apt-get update && \
+    apt-get install -y build-essential nasm make && \
+    rm -rf /var/lib/apt/lists/*
+
+# Default working directory inside container
+WORKDIR /work
+
