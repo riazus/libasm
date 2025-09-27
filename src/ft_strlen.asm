@@ -3,13 +3,16 @@
 global ft_strlen
 
 section .text
+; arg1 = rdi
 ft_strlen:
     mov     rax, rdi
+
 .loop:
     cmp     byte [rax], 0
     je      .done
     inc     rax
     jmp     .loop
+
 .done:
     sub     rax, rdi
     ret
