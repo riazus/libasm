@@ -5,12 +5,20 @@ extern malloc
 ; libasm functions
 extern ft_strlen
 extern ft_strcpy
+extern ft_strcmp
 
 section .data
+    ; ------- Formatters for printf -------
     fmt_ft_strlen db "%s (%d)", 10, 0
     ftm_ft_strcpy db "Source string -> '%s' | Destination string -> '%s'", 10, 0
+    ftm_ft_strcmp db "First string: '%s' | Second string: '%s' | Diff: %d", 10, 0
+    ; ----------------------------
+
     str1 db "Hello", 0
     str2 db "custom", 0
+
+    str1_ft_strlen db "helloa", 0
+    str2_ft_strlen db "hello2", 0
 
 section .text
 global main
@@ -60,6 +68,18 @@ main:
     mov     rdi, ftm_ft_strcpy
     mov     rsi, str1
     mov     rdx, rax
+    xor     rax, rax
+    call    printf
+
+    mov     rdi, str1_ft_strlen
+    mov     rsi, str2_ft_strlen
+    call    ft_strcmp
+
+    ; RAX holds the diff between str1 & str2
+    mov     rdi, ftm_ft_strcmp
+    mov     rsi, str1_ft_strlen
+    mov     rdx, str2_ft_strlen
+    mov     rcx, rax
     xor     rax, rax
     call    printf
 

@@ -18,8 +18,6 @@ ft_strcpy:
     jmp     .loop
 
 .done:
-    ; mov     rsi, rax
-
     ; write the terminator symbol
     mov     byte [rdi], 0
     ret
