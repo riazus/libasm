@@ -7,6 +7,7 @@ extern ft_strlen
 extern ft_strcpy
 extern ft_strcmp
 extern ft_write
+extern ft_read
 
 section .data
     ; ------- Formatters for printf -------
@@ -39,7 +40,7 @@ main:
     mov     rsi, str1
     mov     rdx, rax
     xor     rax, rax
-    call    printf
+    ;call    printf
 
     ; Second example
     mov     rdi, str2
@@ -49,7 +50,7 @@ main:
     mov     rsi, str2
     mov     rdx, rax
     xor     rax, rax
-    call    printf
+    ;call    printf
     ; ----------------------------
 
     ; ------- FT_STRCPY ----------
@@ -60,7 +61,7 @@ main:
     ; RAX points to the length of the str1
     mov     rdi, rax
     inc     rdi
-    call    malloc
+    ;call    malloc
 
     ; RAX points to the beginning of the allocated memory
     mov     rdi, rax
@@ -72,13 +73,13 @@ main:
     mov     rsi, str1
     mov     rdx, rax
     xor     rax, rax
-    call    printf
+    ;call    printf
     ; ----------------------------
 
     ; ------- FT_STRCMP ----------
     mov     rdi, str1_ft_strlen
     mov     rsi, str2_ft_strlen
-    call    ft_strcmp
+    ;call    ft_strcmp
 
     ; RAX holds the diff between str1 & str2
     mov     rdi, fmt_ft_strcmp
@@ -86,7 +87,7 @@ main:
     mov     rdx, str2_ft_strlen
     mov     rcx, rax
     xor     rax, rax
-    call    printf
+    ;call    printf
     ; ----------------------------
 
     ; ------- FT_WRITE ----------
@@ -96,8 +97,44 @@ main:
     mov     rdi, 1
     mov     rsi, str_ft_write
     mov     rdx, rax
+    ;call    ft_write
+    ; ----------------------------
+
+    ; ------- FT_READ ----------
+    mov     rdi, 6
+    call    malloc
+    mov     rcx, rax
+
+    ; buffer capacity - 6 bytes
+    mov     r8, 6
+    ; bytes_used count
+    mov     rbx, 0
+    
+.ft_read_loop:
+    mov     rdi, 0
+    lea     rsi, [rcx+rbx]  ; pointer to next free spot
+    mov     rdx, r8
+    sub     rdx, rbx
+    call    ft_read
+
+    cmp     rax, 0
+    je      .done
+    js      .error
+
+    
+    add     rbx, rax
+    cmp     rbx, r8
+    jne     .ft_read_loop
+
+    mov     rdi, 1
+    mov     rsi, rcx
+    mov     rdx, rbx
     call    ft_write
     ; ----------------------------
 
+.error:
+    ret
+
+.done:
     pop     rbp             ; Restore base pointer
     ret

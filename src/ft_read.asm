@@ -1,15 +1,15 @@
-; ssize_t write(int fildes, const void *buf, size_t nbyte)
+; ssize_t read(int fildes, void *buf, size_t nbyte);
 
 extern __errno_location
 
-global ft_write
+global ft_read
 
 section .text
 ; arg1 = rdi, arg2 = rsi, arg3 = rdx
-ft_write:
-    mov   rax, 1
+ft_read:
+    mov   rax, 0
     syscall
-    
+
     cmp   rax, 0
     js    .error
 
