@@ -6,12 +6,13 @@ extern malloc
 extern ft_strlen
 extern ft_strcpy
 extern ft_strcmp
+extern ft_write
 
 section .data
     ; ------- Formatters for printf -------
     fmt_ft_strlen db "%s (%d)", 10, 0
-    ftm_ft_strcpy db "Source string -> '%s' | Destination string -> '%s'", 10, 0
-    ftm_ft_strcmp db "First string: '%s' | Second string: '%s' | Diff: %d", 10, 0
+    fmt_ft_strcpy db "Source string -> '%s' | Destination string -> '%s'", 10, 0
+    fmt_ft_strcmp db "First string: '%s' | Second string: '%s' | Diff: %d", 10, 0
     ; ----------------------------
 
     str1 db "Hello", 0
@@ -19,6 +20,8 @@ section .data
 
     str1_ft_strlen db "helloa", 0
     str2_ft_strlen db "hello2", 0
+
+    str_ft_write db "Hello from ft_write", 10, 0
 
 section .text
 global main
@@ -65,24 +68,35 @@ main:
     call    ft_strcpy
 
     ; RAX points to the beginning of the copied string
-    mov     rdi, ftm_ft_strcpy
+    mov     rdi, fmt_ft_strcpy
     mov     rsi, str1
     mov     rdx, rax
     xor     rax, rax
     call    printf
+    ; ----------------------------
 
+    ; ------- FT_STRCMP ----------
     mov     rdi, str1_ft_strlen
     mov     rsi, str2_ft_strlen
     call    ft_strcmp
 
     ; RAX holds the diff between str1 & str2
-    mov     rdi, ftm_ft_strcmp
+    mov     rdi, fmt_ft_strcmp
     mov     rsi, str1_ft_strlen
     mov     rdx, str2_ft_strlen
     mov     rcx, rax
     xor     rax, rax
     call    printf
+    ; ----------------------------
 
+    ; ------- FT_WRITE ----------
+    mov     rdi, str_ft_write
+    call    ft_strlen
+
+    mov     rdi, 1
+    mov     rsi, str_ft_write
+    mov     rdx, rax
+    call    ft_write
     ; ----------------------------
 
     pop     rbp             ; Restore base pointer
