@@ -2,6 +2,11 @@
 #include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <errno.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include "libasm.h"
 
 void test_ft_strlen() {
@@ -84,12 +89,183 @@ void test_ft_write() {
     printf("ft_write tests passed!\n");
 }
 
+static ssize_t read_all_with(int fd, char *buffer, size_t capacity,
+                             ssize_t (*reader)(int, void *, size_t)) {
+    size_t totalBytesRead = 0;
+
+    while (1) {
+        size_t remainingCapacity = capacity - totalBytesRead;
+        if (remainingCapacity == 0) {
+            break;
+        }
+
+        ssize_t bytesRead = reader(fd, buffer + totalBytesRead, remainingCapacity);
+        if (bytesRead < 0) {
+            return bytesRead;
+        }
+        if (bytesRead == 0) {
+            break;
+        }
+        totalBytesRead += (size_t)bytesRead;
+    }
+
+    return (ssize_t)totalBytesRead;
+}
+
+static ssize_t libc_read_shim(int fd, void *buf, size_t nbyte) {
+    return read(fd, buf, nbyte);
+}
+
 void test_ft_read() {
     printf("Testing ft_read...\n");
-    printf("Note: ft_read test requires manual input or file setup\n");
-    // This would require more complex setup with files or pipes
-    // For now, just indicate the function exists
-    printf("ft_read function is available for use\n");
+
+    // 1) Read a real file fully and compare to libc read
+    {
+        const char *path = "src/ft_read.asm";
+        int fdA = open(path, O_RDONLY);
+        int fdB = open(path, O_RDONLY);
+        assert(fdA >= 0 && fdB >= 0);
+
+        struct stat st;
+        assert(fstat(fdA, &st) == 0);
+        size_t fileSize = (size_t)st.st_size;
+        char *bufferA = (char *)malloc(fileSize + 1);
+        char *bufferB = (char *)malloc(fileSize + 1);
+        assert(bufferA != NULL && bufferB != NULL);
+
+        ssize_t bytesReadA = read_all_with(fdA, bufferA, fileSize, ft_read);
+        ssize_t bytesReadB = read_all_with(fdB, bufferB, fileSize, libc_read_shim);
+        assert(bytesReadA == bytesReadB);
+        assert(bytesReadA >= 0);
+        bufferA[bytesReadA] = '\0';
+        bufferB[bytesReadB] = '\0';
+        assert(memcmp(bufferA, bufferB, (size_t)bytesReadA) == 0);
+
+        // EOF should return 0
+        char tmp;
+        assert(ft_read(fdA, &tmp, 1) == 0);
+        assert(read(fdB, &tmp, 1) == 0);
+
+        free(bufferA);
+        free(bufferB);
+        close(fdA);
+        close(fdB);
+    }
+
+    // 2) Chunked 1-byte reads
+    {
+        const char *path = "src/ft_read.asm";
+        int fdA = open(path, O_RDONLY);
+        int fdB = open(path, O_RDONLY);
+        assert(fdA >= 0 && fdB >= 0);
+
+        enum { CAPACITY = 4096 };
+        char bufferA[CAPACITY];
+        char bufferB[CAPACITY];
+        ssize_t totalA = 0;
+        ssize_t totalB = 0;
+        for (;;) {
+            ssize_t nA = ft_read(fdA, bufferA + totalA, 1);
+            ssize_t nB = read(fdB, bufferB + totalB, 1);
+            assert(nA == nB);
+            if (nA <= 0) break;
+            totalA += nA;
+            totalB += nB;
+            assert(totalA < CAPACITY && totalB < CAPACITY);
+        }
+        assert(totalA == totalB);
+        assert(memcmp(bufferA, bufferB, (size_t)totalA) == 0);
+
+        close(fdA);
+        close(fdB);
+    }
+
+    // 3) Read from a pipe: known data
+    {
+        int pipeA[2];
+        int pipeB[2];
+        assert(pipe(pipeA) == 0);
+        assert(pipe(pipeB) == 0);
+        const char *message = "Hello from ft_read pipe test!";
+        size_t messageLength = strlen(message);
+        assert(write(pipeA[1], message, messageLength) == (ssize_t)messageLength);
+        assert(write(pipeB[1], message, messageLength) == (ssize_t)messageLength);
+        close(pipeA[1]);
+        close(pipeB[1]);
+
+        char bufferA[128] = {0};
+        char bufferB[128] = {0};
+        ssize_t readA = read_all_with(pipeA[0], bufferA, sizeof(bufferA), ft_read);
+        ssize_t readB = read_all_with(pipeB[0], bufferB, sizeof(bufferB), libc_read_shim);
+        assert(readA == readB);
+        assert(memcmp(bufferA, bufferB, (size_t)readA) == 0);
+        close(pipeA[0]);
+        close(pipeB[0]);
+    }
+
+    // 4) Zero-length read returns 0 and does not modify buffer
+    {
+        const char *path = "src/ft_read.asm";
+        int fd = open(path, O_RDONLY);
+        assert(fd >= 0);
+        char buffer[8] = { 'X','X','X','X','X','X','X','X' };
+        errno = 0;
+        ssize_t n = ft_read(fd, buffer, 0);
+        assert(n == 0);
+        for (int i = 0; i < 8; i++) {
+            assert(buffer[i] == 'X');
+        }
+        close(fd);
+    }
+
+    // 5) Error: invalid fd sets errno like libc (EBADF)
+    {
+        char a, b;
+        errno = 0;
+        ssize_t ra = ft_read(-1, &a, 1);
+        int ea = errno;
+        errno = 0;
+        ssize_t rb = read(-1, &b, 1);
+        int eb = errno;
+        assert(ra == -1 && rb == -1);
+        assert(ea == eb);
+    }
+
+    // 6) Large file: create, write, then read back with both
+    {
+        char pathTemplate[] = "/tmp/ftreadXXXXXX";
+        int writeFd = mkstemp(pathTemplate);
+        assert(writeFd >= 0);
+        size_t numBytes = 1 << 20; // 1 MiB
+        char *source = (char *)malloc(numBytes);
+        assert(source != NULL);
+        for (size_t i = 0; i < numBytes; i++) {
+            source[i] = (char)(i * 1315423911u);
+        }
+        assert(write(writeFd, source, numBytes) == (ssize_t)numBytes);
+        close(writeFd);
+
+        int fdA = open(pathTemplate, O_RDONLY);
+        int fdB = open(pathTemplate, O_RDONLY);
+        assert(fdA >= 0 && fdB >= 0);
+
+        char *bufferA = (char *)malloc(numBytes);
+        char *bufferB = (char *)malloc(numBytes);
+        assert(bufferA != NULL && bufferB != NULL);
+        ssize_t readA = read_all_with(fdA, bufferA, numBytes, ft_read);
+        ssize_t readB = read_all_with(fdB, bufferB, numBytes, libc_read_shim);
+        assert(readA == (ssize_t)numBytes && readB == (ssize_t)numBytes);
+        assert(memcmp(bufferA, bufferB, numBytes) == 0);
+
+        free(source);
+        free(bufferA);
+        free(bufferB);
+        close(fdA);
+        close(fdB);
+        unlink(pathTemplate);
+    }
+
+    printf("ft_read tests passed!\n");
 }
 
 void test_ft_strdup() {
