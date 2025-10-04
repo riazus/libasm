@@ -8,10 +8,10 @@ ft_strcmp:
 
 .loop:
     mov   al, [rdi]
-    mov   bl, [rsi]
+    mov   dl, [rsi]
 
     ; if they are not equal, return %rax
-    cmp   al, bl
+    cmp   al, dl
     jne    .done_diff
     
     ; compare only %al for end of string 
@@ -28,8 +28,8 @@ ft_strcmp:
 
 .done_diff:
     movzx eax, al
-    movzx ebx, bl
-    sub   eax, ebx
+    movzx edx, dl
+    sub   eax, edx
     ret
 
 .done:

@@ -11,8 +11,8 @@ ft_strcpy:
     cmp     byte [rsi], 0
     je      .done
 
-    mov     bl, [rsi]
-    mov     [rdi], bl
+    mov     dl, [rsi]
+    mov     [rdi], dl
     inc     rdi
     inc     rsi
     jmp     .loop
