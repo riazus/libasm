@@ -1,9 +1,9 @@
-NAME		:= libasm
+NAME			:= libasm
 LIBNAME		:= libasm.a
 
-ASM			:= nasm
+ASM				:= nasm
 ASMFLAGS	:= -f elf64
-CC			:= gcc
+CC				:= gcc
 CFLAGS		:= -Wall -Wextra -Werror
 LD      	:= gcc
 

@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
+#include <stdlib.h>
 #include "libasm.h"
 
 void test_ft_strlen() {
@@ -91,6 +92,82 @@ void test_ft_read() {
     printf("ft_read function is available for use\n");
 }
 
+void test_ft_strdup() {
+    printf("Testing ft_strdup...\n");
+
+    // 1) Basic duplication equals to libc strdup
+    {
+        const char *src = "str to duplicate";
+        char *got = ft_strdup(src);
+        char *exp = strdup(src);
+        assert(got != NULL);
+        assert(exp != NULL);
+        assert(got != src);
+        assert(strcmp(got, exp) == 0);
+        free(got);
+        free(exp);
+    }
+
+    // 2) Empty string
+    {
+        const char *src = "";
+        char *got = ft_strdup(src);
+        char *exp = strdup(src);
+        assert(got != NULL);
+        assert(exp != NULL);
+        assert(strcmp(got, exp) == 0);
+        free(got);
+        free(exp);
+    }
+
+    // 3) Long string
+    {
+        size_t n = 8192;
+        char *buf = malloc(n + 1);
+        assert(buf != NULL);
+        for (size_t i = 0; i < n; i++) buf[i] = (char)('a' + (i % 26));
+        buf[n] = '\0';
+        char *got = ft_strdup(buf);
+        char *exp = strdup(buf);
+        assert(got != NULL);
+        assert(exp != NULL);
+        assert(strcmp(got, exp) == 0);
+        free(got);
+        free(exp);
+        free(buf);
+    }
+
+    // 4) Embedded NUL: only prefix up to first NUL should be duplicated
+    {
+        char src_arr[] = { 'A', 'B', '\0', 'C', 'D', '\0' };
+        const char *src = src_arr; // treated as string up to first NUL
+        char *got = ft_strdup(src);
+        char *exp = strdup(src);
+        assert(got != NULL);
+        assert(exp != NULL);
+        assert(strcmp(got, "AB") == 0);
+        assert(strcmp(exp, "AB") == 0);
+        assert(strcmp(got, exp) == 0);
+        free(got);
+        free(exp);
+    }
+
+    // 5) Non-ASCII bytes (still treated as bytes)
+    {
+        const unsigned char src_arr[] = { 0xC3, 0xA9, 'X', 0 }; // "éX" in UTF-8
+        const char *src = (const char *)src_arr;
+        char *got = ft_strdup(src);
+        char *exp = strdup(src);
+        assert(got != NULL);
+        assert(exp != NULL);
+        assert(strcmp(got, exp) == 0);
+        free(got);
+        free(exp);
+    }
+
+    printf("ft_strdup tests passed!\n");
+}
+
 int main() {
     printf("=== libasm Test Suite ===\n\n");
     
@@ -107,6 +184,9 @@ int main() {
     printf("\n");
     
     test_ft_read();
+    printf("\n");
+
+    test_ft_strdup();
     printf("\n");
     
     printf("=== All tests completed! ===\n");
