@@ -28,6 +28,7 @@ ft_strcmp:
 
 .done_diff:
     movzx eax, al
+    movzx ebx, bl
     sub   eax, ebx
     ret
 
