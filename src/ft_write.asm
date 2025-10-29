@@ -7,20 +7,20 @@ global ft_write
 section .text
 ; arg1 = rdi, arg2 = rsi, arg3 = rdx
 ft_write:
-    mov   rax, 1
-    syscall
-    
-    cmp   rax, 0
-    js    .error
+	mov   rax, 1
+	syscall
+	
+	cmp   rax, 0
+	js    .error
 
-    ret
+	ret
 
 .error:
-    neg   rax
-    mov   rcx, rax
+	neg   rax
+	mov   rcx, rax
 
-    call  __errno_location wrt ..plt
+	call  __errno_location wrt ..plt
 
-    mov   [rax], ecx
-    mov   rax, -1
-    ret
+	mov   [rax], ecx
+	mov   rax, -1
+	ret
