@@ -16,6 +16,27 @@ void ft_list_clear(t_list **head) {
 	*head = NULL;
 }
 
+void test_ft_list_sort() {
+    printf("Testing ft_list_sort...\n");
+
+    t_list *first_node = malloc(sizeof(t_list));
+	first_node->data = "3";
+    first_node->next = NULL;
+    ft_list_push_front(&first_node, "2");
+	ft_list_push_front(&first_node, "1");
+	ft_list_push_front(&first_node, "0");
+    ft_list_sort(&first_node, &strcmp);
+
+    t_list *curr = first_node;
+	for (int i = 0; i < 4 && curr; i++) {
+		int node_data = atoi((char *)curr->data);
+		assert(i == node_data);
+		curr = curr->next;
+	}
+
+    ft_list_clear(&first_node);
+}
+
 void test_ft_list_size() {
 	printf("Testing ft_list_size...\n");
 
@@ -76,6 +97,7 @@ int main() {
     test_ft_atoi_base();
     test_ft_list_push_front();
 	test_ft_list_size();
+    test_ft_list_sort();
 
     printf("\n=== All tests completed! ===\n");
     return 0;
