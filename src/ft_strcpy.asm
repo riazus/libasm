@@ -1,23 +1,19 @@
 ; char* ft_strcpy(char *dst, const char *src)
 
-global ft_strcpy
+        global  ft_strcpy
+        section .text
 
-section .text
-; arg1 = rdi, arg2 = rsi
+; dst = rdi, src = rsi
 ft_strcpy:
-    mov     rax, rdi
-
+        mov     rax, rdi
 .loop:
-    cmp     byte [rsi], 0
-    je      .done
-
-    mov     dl, [rsi]
-    mov     [rdi], dl
-    inc     rdi
-    inc     rsi
-    jmp     .loop
-
-.done:
-    ; write the terminator symbol
-    mov     byte [rdi], 0
-    ret
+        cmp     byte [rsi], 0
+        je      .return
+        mov     dl, [rsi]
+        mov     [rdi], dl
+        inc     rdi
+        inc     rsi
+        jmp     .loop
+.return:
+        mov     byte [rdi], 0
+        ret
