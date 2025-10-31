@@ -1,51 +1,44 @@
 ; int ft_atoi_base(char *str, char *base)
-; Converts a string in a given base to an integer
-; Parameters: rdi = str, rsi = base
-; Returns: eax = converted integer or 0 if invalid
 
-global ft_atoi_base
-
-section .text
+        global  ft_atoi_base
+        section .text
 
 ft_atoi_base:
-    ; Save registers we'll use (callee-saved registers)
-    push    rbx         ; Will store base pointer
-    push    rcx         ; Will store base length
-    push    rdx         ; Will store current character
-    push    r8          ; Will store result
-    push    r9          ; Will store sign
-    push    r10         ; Will store temporary values
-    push    r11         ; Will store string pointer
-    
-    ; Initialize variables
-    mov     rbx, rsi    ; rbx = base pointer
-    mov     r11, rdi    ; r11 = str pointer
-    xor     r8, r8      ; r8 = result = 0
-    mov     r9, 1       ; r9 = sign = 1 (positive)
-    
-    ; Step 1: Validate base
-    call    validate_base
-    test    eax, eax    ; Check if base is valid
-    jz      .return_zero ; If invalid, return 0
-    
-    mov     rcx, rax    ; rcx = base_length (returned from validate_base)
-    
-    ; Step 2: Skip leading whitespace in str
-    call    skip_whitespace
-    mov     r11, rax    ; Update str pointer to first non-whitespace
-    
-    ; Step 3: Handle sign characters
-    call    handle_sign
-    mov     r11, rax    ; Update str pointer after sign
-    ; r9 now contains the sign (1 or -1)
-    
-    ; Step 4: Convert digits
-    call    convert_digits
-    
-    ; Step 5: Apply sign and return
-    imul    r8, r9      ; result *= sign
-    mov     eax, r8d    ; Return result in eax (32-bit)
-    jmp     .cleanup
+        push    rbx         ; (pointer)
+        push    rcx         ; (base length)
+        push    rdx         ; (current_character)
+        push    r8          ; (result)
+        push    r9          ; (sign)
+        push    r10         ; for tmp values
+        push    r11         ; (string pointer)
+
+        mov     rbx, rsi    ; rbx = base pointer
+        mov     r11, rdi    ; r11 = str pointer
+        xor     r8, r8      ; r8 = result = 0
+        mov     r9, 1       ; r9 = sign = 1 (positive)
+
+        call    validate_base
+        test    eax, eax    ; Check if base is valid
+        jz      .return_zero ; If invalid, return 0
+
+        mov     rcx, rax    ; rcx = base_length (returned from validate_base)
+        
+        ; Step 2: Skip leading whitespace in str
+        call    skip_whitespace
+        mov     r11, rax    ; Update str pointer to first non-whitespace
+        
+        ; Step 3: Handle sign characters
+        call    handle_sign
+        mov     r11, rax    ; Update str pointer after sign
+        ; r9 now contains the sign (1 or -1)
+        
+        ; Step 4: Convert digits
+        call    convert_digits
+        
+        ; Step 5: Apply sign and return
+        imul    r8, r9      ; result *= sign
+        mov     eax, r8d    ; Return result in eax (32-bit)
+        jmp     .cleanup
 
 .return_zero:
     xor     eax, eax    ; Return 0

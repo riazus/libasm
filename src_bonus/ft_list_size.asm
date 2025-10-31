@@ -5,15 +5,13 @@
 
 ft_list_size:
 		mov		rsi, rdi
-		xor		rax, rax
-		jmp		.count
-.increment:
-		inc		rax
-.count:
+		xor		rax, rax	
+.loop:
 		cmp		rdi, 0
 		jz		.return
 		mov		rdi, [rdi + 8]
-		jmp		.increment
+        inc		rax
+		jmp		.loop
 .return:
 		mov		rdi, rsi
 		ret
