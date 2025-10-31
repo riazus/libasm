@@ -23,8 +23,6 @@ void test_ft_strlen() {
     // Test longer string
     char *long_str = "This is a longer string for testing";
     assert(ft_strlen(long_str) == strlen(long_str));
-    
-    printf("ft_strlen tests passed!\n");
 }
 
 void test_ft_strcpy() {
@@ -42,8 +40,6 @@ void test_ft_strcpy() {
     strcpy(dst1, "");
     ft_strcpy(dst2, "");
     assert(strcmp(dst1, dst2) == 0);
-    
-    printf("ft_strcpy tests passed!\n");
 }
 
 void test_ft_strcmp() {
@@ -71,8 +67,6 @@ void test_ft_strcmp() {
     char *str5_1 = "aaa";
     char *str5_2 = "AAA";
     assert(ft_strcmp(str5_1, str5_2) == strcmp(str5_1, str5_2));
-    
-    printf("ft_strcmp tests passed!\n");
 }
 
 void test_ft_write() {
@@ -82,11 +76,9 @@ void test_ft_write() {
     char *msg_main = "Testing ft_write function from main...\n";
     char *msg_test = "Testing ft_write function from test...\n";
     ssize_t result_main = ft_write(1, msg_main, strlen(msg_main));
-    ssize_t result_test = ft_write(1, msg_test, strlen(msg_test));
+    ssize_t result_test = write(1, msg_test, strlen(msg_test));
   
     assert(result_main == result_test);
-    
-    printf("ft_write tests passed!\n");
 }
 
 static ssize_t read_all_with(int fd, char *buffer, size_t capacity,
@@ -264,8 +256,6 @@ void test_ft_read() {
         close(fdB);
         unlink(pathTemplate);
     }
-
-    printf("ft_read tests passed!\n");
 }
 
 void test_ft_strdup() {
@@ -340,31 +330,18 @@ void test_ft_strdup() {
         free(got);
         free(exp);
     }
-
-    printf("ft_strdup tests passed!\n");
 }
 
 int main() {
     printf("=== libasm Test Suite ===\n\n");
     
     test_ft_strlen();
-    printf("\n");
-    
     test_ft_strcpy();
-    printf("\n");
-    
     test_ft_strcmp();
-    printf("\n");
-    
     test_ft_write();
-    printf("\n");
-    
     test_ft_read();
-    printf("\n");
-
     test_ft_strdup();
-    printf("\n");
-    
-    printf("=== All tests completed! ===\n");
+
+    printf("\n=== All tests completed! ===\n");
     return 0;
 }
