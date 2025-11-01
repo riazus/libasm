@@ -22,5 +22,5 @@ ft_list_push_front:
 		mov		rcx, [rdi]
 		mov		[rax + 8], rcx
 		mov		[rdi], rax
-.return
+.return:
 		ret

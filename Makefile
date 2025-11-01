@@ -10,17 +10,17 @@ LD      	:= gcc
 SRC_DIR		:= src
 OBJ_DIR		:= obj
 
-ASM_SRCS	:= $(filter-out $(SRC_DIR)/main.c, $(wildcard $(SRC_DIR)/*.asm))
-ASM_OBJS	:= $(patsubst $(SRC_DIR)/%.asm,$(OBJ_DIR)/%.o,$(ASM_SRCS))
+ASM_SRCS	:= $(filter-out %_bonus.s, $(wildcard $(SRC_DIR)/*.s))
+ASM_OBJS	:= $(patsubst $(SRC_DIR)/%.s,$(OBJ_DIR)/%.o,$(ASM_SRCS))
 
 C_SRCS		:= $(SRC_DIR)/main.c
 C_OBJS		:= $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(C_SRCS))
 
-BONUS_DIR	:= src_bonus
-BONUS_SRCS	:= $(wildcard $(BONUS_DIR)/*.asm)
-BONUS_OBJS	:= $(patsubst $(BONUS_DIR)/%.asm,$(OBJ_DIR)/%.o,$(BONUS_SRCS))
-BONUS_C_SRCS	:= $(wildcard $(BONUS_DIR)/*.c)
-BONUS_C_OBJS	:= $(patsubst $(BONUS_DIR)/%.c,$(OBJ_DIR)/bonus_%.o,$(BONUS_C_SRCS))
+BONUS_DIR	:= src
+BONUS_SRCS	:= $(wildcard $(BONUS_DIR)/*_bonus.s)
+BONUS_OBJS	:= $(patsubst $(BONUS_DIR)/%_bonus.s,$(OBJ_DIR)/%_bonus.o,$(BONUS_SRCS))
+BONUS_C_SRCS	:= $(wildcard $(BONUS_DIR)/*_bonus.c)
+BONUS_C_OBJS	:= $(patsubst $(BONUS_DIR)/%_bonus.c,$(OBJ_DIR)/%_bonus.o,$(BONUS_C_SRCS))
 BONUS_NAME	:= libasm_bonus
 
 all: $(NAME)
@@ -36,16 +36,16 @@ $(NAME): $(C_OBJS) $(LIBNAME)
 $(BONUS_NAME): $(BONUS_C_OBJS) $(BONUS_OBJS) $(LIBNAME)
 	$(LD) -o $@ $(BONUS_C_OBJS) $(BONUS_OBJS) -L. -lasm
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.asm | $(OBJ_DIR)
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.s | $(OBJ_DIR)
 	$(ASM) $(ASMFLAGS) -o $@ $<
 
-$(OBJ_DIR)/%.o: $(BONUS_DIR)/%.asm | $(OBJ_DIR)
+$(OBJ_DIR)/%_bonus.o: $(BONUS_DIR)/%_bonus.s | $(OBJ_DIR)
 	$(ASM) $(ASMFLAGS) -o $@ $<
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 	$(CC) $(CFLAGS) -I$(SRC_DIR) -c $< -o $@
 
-$(OBJ_DIR)/bonus_%.o: $(BONUS_DIR)/%.c | $(OBJ_DIR)
+$(OBJ_DIR)/%_bonus.o: $(BONUS_DIR)/%_bonus.c | $(OBJ_DIR)
 	$(CC) $(CFLAGS) -I$(SRC_DIR) -I$(BONUS_DIR) -c $< -o $@
 
 $(OBJ_DIR):

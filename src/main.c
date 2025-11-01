@@ -113,7 +113,7 @@ void test_ft_read() {
 
     // 1) Read a real file fully and compare to libc read
     {
-        const char *path = "src/ft_read.asm";
+        const char *path = "src/ft_read.s";
         int fdA = open(path, O_RDONLY);
         int fdB = open(path, O_RDONLY);
         assert(fdA >= 0 && fdB >= 0);
@@ -146,7 +146,7 @@ void test_ft_read() {
 
     // 2) Chunked 1-byte reads
     {
-        const char *path = "src/ft_read.asm";
+        const char *path = "src/ft_read.s";
         int fdA = open(path, O_RDONLY);
         int fdB = open(path, O_RDONLY);
         assert(fdA >= 0 && fdB >= 0);
@@ -197,7 +197,7 @@ void test_ft_read() {
 
     // 4) Zero-length read returns 0 and does not modify buffer
     {
-        const char *path = "src/ft_read.asm";
+        const char *path = "src/ft_read.s";
         int fd = open(path, O_RDONLY);
         assert(fd >= 0);
         char buffer[8] = { 'X','X','X','X','X','X','X','X' };
